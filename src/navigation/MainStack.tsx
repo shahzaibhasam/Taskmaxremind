@@ -1,13 +1,18 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 import {NavigationContainer} from '@react-navigation/native';
-import HomeStack from '.';
+import AuthStack from '.';
+import HomeStack from './HomeStack';
+import { useSelector } from 'react-redux';
+import { RootState } from '../lib';
+import MyDrawer from './DrawerStack';
 
 const MainStack = () => {
+  const token = useSelector((state: RootState) => state.authReducer.token);
   return (
     <NavigationContainer>
  
-     <HomeStack/>
+ {token ? <MyDrawer /> : <AuthStack />}
 
  </NavigationContainer>
   )

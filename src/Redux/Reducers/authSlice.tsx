@@ -1,9 +1,10 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 interface AuthState {
   token: string | null;
   user:object,
-  products:  object[];
+ filter:object
+
   
 
 }
@@ -11,7 +12,13 @@ interface AuthState {
 const initialState: AuthState = {
   token: null,
   user:{},
-  products: null,
+  filter:{
+    provider:'',
+    location:'',
+    startDate:null,
+    endDate:null
+  },
+
 };
 
 const userSlice = createSlice({
@@ -26,15 +33,13 @@ const userSlice = createSlice({
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
     },
-    addProduct: (state, action: PayloadAction<object>) => {
-      if (state.products === null) {
-        state.products = [];
-      }
-      state.products.push(action.payload);
-    },
+    setFilterData(state,action: PayloadAction<{ location:string, provider: string; startDate: Date; endDate: Date }>){
+      state.filter = { ...state.filter, ...action.payload };
+    }
+
   },
 
 });
 
-export const { setUser, setToken,addProduct } = userSlice.actions;
+export const { setUser, setToken,setFilterData } = userSlice.actions;
 export const authReducer = userSlice.reducer;

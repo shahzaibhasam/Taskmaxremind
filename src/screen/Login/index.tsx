@@ -1,102 +1,255 @@
-import { View, Text, StyleSheet, Platform, TextInput, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, StyleSheet, Platform, Image, Dimensions, TextInput } from "react-native";
+import React, { useRef, useState } from "react";
 import { colors } from "../../utilis";
 import AppTextInput from "../../component/AppTextInput";
 import AppButton from "../../component/AppButton";
-import { useNavigation } from "@react-navigation/native";
-import { routes } from "../../Api/routes";
-import { postRequest } from "../../Api";
+import {
+  KeyboardAwareScrollView,
+  } from 'react-native-keyboard-aware-scroll-view';
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setToken, setUser } from "../../Redux/Reducers/authSlice";
-import store from "../../Redux/store";
+import BackgroundImage from "../../component/BackgroundImage";
+import { RootState, getFontSize, getHeight, getWidth } from "../../lib";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Checkbox from 'expo-checkbox';
+import { useNavigation } from "@react-navigation/native";
+
 
 const Login = () => {
   const dispatch=useDispatch()
-  const [username, setUsername] = useState<string>("kminchelle");
-  const [password,setPassword]=useState<string>('0lelplR')
-  const navigation = useNavigation()
-  // const token = store.getState().authReducer?.token;
-// const token = useSelector((state: RootState) => state.authReducer.token);
+  const navigation=useNavigation()
+  const userRef = useRef<TextInput>(null);
+  const userPass = useRef<TextInput>(null);
+  const [username, setUsername] = useState<string>("");
+  const [password,setPassword]=useState<string>('')
+  const [eyeActice,setEyeActive]=useState(false)
+  const [isChecked, setChecked] = useState(false);
+ 
+ 
+const token = useSelector((state: RootState) => state.authReducer.token);
   const handleUsernameChange = (text: string): void => {
     setUsername(text);
+
   };
-  const logedInObj={username:username,password:password}
+  const handlePasswordChange = (text: string): void => {
+    setPassword(text);
+  };
+
+
+  const logedInObj={email:username,password:password}
+  console.log('password',logedInObj)
 
   const fetchData = async () => {
+    const TOKEN_URL ='https://api.maxremind.technology/api/v1/mxchuser/login/'
+    
     try {
-      const response = await axios.post('https://dummyjson.com/auth/login', {
-        username: username,
-        password: password,
-        // expiresInMins: 60, // optional
+      const response = await axios.post(TOKEN_URL, logedInObj,{
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+ 
   if(response?.status==200){
-    dispatch(setToken(response?.data?.token))
+    dispatch(setToken(response?.data?.access_token))
     dispatch(setUser(response?.data))
     navigation.navigate('Home')
   }
-      // console.log(response?.data?.token);
+      console.log(response?.data?.token);
      
     } catch (error) {
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
       console.error(error);
     }
-    // try {
-    //   const response = await postRequest(logedInObj, routes.login);
-    //   const data = typeof response === 'string' ? JSON.parse(response) : response;
-    //   // Assuming data is of type LoginResponse
-    //   console.log(data);
-    // } catch (error) {
-    //   console.error(error);
-    // }
-  };
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.goodtosee}>
-        <Text style={styles.seetext}>Good to see you!</Text>
-        <Text style={{ fontSize: 12, color: colors.primary, marginTop: 5 }}>
-          let's continue the journey
-        </Text>
-      </View>
-      <View style={styles.inputCon}>
-        <Text
-          style={styles.textt}
-        >
-          Username
-        </Text>
-        <AppTextInput onChangeText={handleUsernameChange} value={username} defaultValue={username} secureTextEntry={false} placeholder={'Email'}/>
-        <Text
-          style={styles.textt}
-        >
-          Password
-        </Text>
-        <AppTextInput value={'0lelplR'} defaultValue={'0lelplR'} secureTextEntry={true} placeholder={'Password'}/>
-      </View>
-      <View style={{...styles.inputCon,height:'30%',marginTop:10}}>
-   <AppButton onPress={()=>{
-    fetchData()
-    // navigation.navigate('Home')
-  }
-  } 
-    buttonName={'Log in'} />
-      <Text style={{fontSize:12,color:colors.primary,marginTop:5}}>Don't have an account?</Text>
-      <TouchableOpacity onPress={()=>{
-        
-        navigation.navigate('SignUp')
-        }}>
-      <Text style={{fontSize:12,color:colors.primary,marginTop:5,fontWeight:"bold"}}>Sign Up</Text>
-      </TouchableOpacity>
 
+  };
+  function toggleEyeActive(): void {
+    setEyeActive(!eyeActice);
+  }
+
+
+  return (
+    <>
+    <BackgroundImage>
+    <KeyboardAwareScrollView 
+			contentContainerStyle={styles.container}
+			enableAutomaticScroll
+			// resetScrollToCoords={{ x: 0, y: 0 }}
+			// scrollEnabled={false}
+			extraHeight={getHeight(30)}
+			> 
+      <View style={styles.containerinside}>
+      <Image style={styles.image} source={require('../../../assets/Logo1.png')} />
+      <View style={styles.titleContainer}>
+					<Text style={styles.mainTitle}> Welcome to MaxRemind Charts </Text>
+					<Text style={styles.subTitle}>Enter your Details to login</Text>
+				</View>
+        <AppTextInput ref={userRef} placeholder={'Email'} value={username} onChangeText={handleUsernameChange} iconName="envelope-o" onPress={()=>console.log('hi')}/>
+        <AppTextInput ref={userPass} placeholder={'Password'} value={password} onChangeText={handlePasswordChange} secureTextEntry={eyeActice?false:true} iconName={eyeActice?"eye":'eye-slash'} onPress={toggleEyeActive} />
+          <View style={styles.aligRow}>
+          <Checkbox style={styles.checkbox} color={isChecked ? '#4630EB' : undefined} value={isChecked} onValueChange={()=>setChecked(!isChecked)} />
+          <Text style={styles.forgotPass}>Forgot Password?</Text>
+          </View>
+          <AppButton buttonName={'LOGIN'} backgroundColor={colors.buttontext} onPress={fetchData}/>
+          <AppButton buttonName={'FINGERPRINT'} backgroundColor={colors.btnsecondary} onPress={()=>console.log('he;l')} iconName="finger-print"/>
+          <Text style={styles.signup}>Don&apos;t have an account?</Text>
+        <View style={{position:'absolute',bottom:getHeight(2)}}>
+        <View style={{flexDirection:'row',alignItems:'center'}}>
+        <View style={styles.itemContainer}>
+			
+			<View style={{flexDirection:'row',alignItems:'center'}}>
+      <MaterialCommunityIcons color={colors.primartext} name={'chat-question'} size={20}/>
+      <Text style={styles.footerText}>About Us</Text>
       </View>
-    </SafeAreaView>
+			
+			
+			</View>
+      <View style={styles.itemContainer}>
+			
+			<View style={{flexDirection:'row',alignItems:'center'}}>
+      <MaterialCommunityIcons color={colors.primartext} name={'phone'} size={20}/>
+      <Text style={styles.footerText}>Contact Us</Text>
+      </View>
+			
+			
+			</View>
+      <View style={styles.itemContainer}>
+			
+			<View style={{flexDirection:'row',alignItems:'center'}}>
+      <MaterialCommunityIcons color={colors.primartext} name={'chat-question'} size={20}/>
+      <Text style={styles.footerText}>Feedback</Text>
+      </View>
+			
+			
+			</View>
+        </View>
+        </View>
+		 
+		</View>
+    </KeyboardAwareScrollView>
+    </BackgroundImage>
+    </>
   );
 };
 const styles = StyleSheet.create({
+  footerText: {
+		color: colors.primartext,
+		fontSize: 16,
+		fontWeight: 'bold',
+		textDecorationLine: 'underline',
+		marginHorizontal: 5,
+	},
+  footerContainer: {
+		flexDirection: 'row',
+		position: 'absolute',
+		height: getHeight(8),
+		bottom: 0,
+		width: Dimensions.get('window').width,
+		justifyContent: 'space-around', // Align items horizontally at the center
+		alignItems: 'center', // Align items vertically at the center
+	},
+	itemContainer: {
+		flexDirection: 'row', // Arrange icon and text horizontally
+		alignItems: 'center', // Align items vertically at the center
+		paddingHorizontal: 5,
+		marginHorizontal: 5,
+	},
+
+  footer:{
+    flexDirection: 'row',
+		// position: 'absolute',
+		height: getHeight(8),
+		// bottom: 0,
+		width: Dimensions.get('window').width,
+		justifyContent: 'space-around', // Align items horizontally at the center
+		alignItems: 'center',
+  },
+  signup: {
+		fontSize: 14,
+		fontWeight: '500',
+		color: colors.primartext,
+		textAlign: 'center',
+		paddingTop: 5,
+    marginTop:getHeight(2)
+		// paddingHorizontal: 10,
+	},
+  forgotPass: {
+		fontSize: 14,
+		fontWeight: '500',
+		color: colors.primartext,
+		textAlign: 'right',
+		paddingTop: 5,
+		paddingHorizontal: 10,
+	},
+  checkbox: {
+    marginLeft: 10,
+  },
+  aligRow:{
+flexDirection:'row',
+alignItems:'center',
+// paddingHorizontal:getWidth(4),
+justifyContent:'space-between',
+width:getWidth(88),
+marginTop:10,
+marginBottom:getHeight(4)
+// height:30
+  },
+  aligninput:{
+    alignItems:'center'
+  },
+	titleContainer: {
+		alignItems:'flex-start',
+		justifyContent:'flex-start',
+    marginTop:getHeight(1)
+		 
+		
+	},
+  mainTitle: {
+		fontSize: getFontSize(20),
+		fontWeight: '500',
+		color: colors.primartext,
+		textAlign: 'left',
+		// width: getWidth(80),
+		// height: getHeight(5),
+		marginBottom: 5,
+	},
+  subTitle: {
+		color: colors.primartext,
+
+		fontSize: getFontSize(12),
+		fontWeight: '500',
+		width: getWidth(45),
+		height: getHeight(3),
+		textAlign: 'center',
+		alignContent: 'center',
+		justifyContent: 'flex-start',
+    marginBottom:getHeight(2)
+	},
+  image:{
+		// position: 'absolute', 
+		// left: 30, 
+		// top: 50, 
+		width: getWidth(25),
+		height: getWidth(25), 
+		resizeMode: 'contain',
+		alignSelf:'flex-start',
+    marginLeft:getWidth(2),
+    marginTop:getHeight(1)
+		// backgroundColor:'red'
+	   
+	},
   container: {
     flex: 1,
-    backgroundColor: colors.secondary,
     paddingTop: Platform.OS === "ios" ? 0 : 15,
   },
+  containerinside: {
+		// padding: 15,
+		alignItems: 'center',
+		// justifyContent: 'center',
+		flex: 1,
+	},
   goodtosee: {
     marginTop: 30,
     width: "100%",

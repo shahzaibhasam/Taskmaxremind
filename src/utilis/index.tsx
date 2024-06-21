@@ -1,6 +1,27 @@
 export const colors={
     primary:"#0D2841",
     secondary:'#fff',
-   
+    primartext:'#fff',
+    inputField: '#376088',
+    inputfield: 'rgba(255, 255, 255, 0.30)',
+    iconColor:'#A5A5A5',
+    buttontext:'#FD7702',
+    btnsecondary: '#376088',
+    HEADERBLUE: '#03396C',
+    LIGHTBORDER: '#CCC',
+    headerText: '#DBDBDB',
+    inputFielddrw: '#376088',
+    indicator:'#3f8cff',
+    unactive:'#20222A',
+    SKYBLUE : '#F0F5FF',
+    BLUE : '#003466',
+    searchicon:'#34363D',
+    darktext:'#2d2d2e',
+    lighttext:'#8A7D7D',
+    redd:'#ed2828',
+    Blueradio: '#257CFF',
+    BLACK: '#000',
+    Green: '#3EAE4D',
     
+
 }
